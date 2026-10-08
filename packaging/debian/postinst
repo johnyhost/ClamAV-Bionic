@@ -1,0 +1,12 @@
+#!/bin/sh
+# Creates the clamav user if it is missing and the database directory.
+# Does not enable or start any service: that is a deliberate manual step.
+set -e
+if [ "$1" = "configure" ]; then
+  getent group clamav >/dev/null || groupadd --system clamav
+  getent passwd clamav >/dev/null || useradd --system --gid clamav \
+    --home-dir /var/lib/clamav14 --shell /usr/sbin/nologin clamav
+  install -d -o clamav -g clamav -m 0755 /var/lib/clamav14
+  if [ -d /run/systemd/system ]; then systemctl daemon-reload || true; fi
+fi
+exit 0

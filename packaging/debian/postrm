@@ -1,0 +1,8 @@
+#!/bin/sh
+# Leaves the clamav user alone (Ubuntu's own clamav packages use it too).
+set -e
+if [ "$1" = "purge" ]; then
+  rm -rf /var/lib/clamav14
+fi
+if [ -d /run/systemd/system ]; then systemctl daemon-reload || true; fi
+exit 0

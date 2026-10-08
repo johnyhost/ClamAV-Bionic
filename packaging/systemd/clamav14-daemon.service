@@ -1,0 +1,20 @@
+[Unit]
+Description=ClamAV daemon (clamav-opt, /opt/clamav)
+Documentation=https://github.com/johnyhost/ClamAV-Bionic
+After=network.target
+# Wait until freshclam has downloaded a database.
+ConditionPathExistsGlob=/var/lib/clamav14/main.{c[vl]d,inc}
+
+[Service]
+User=clamav
+Group=clamav
+RuntimeDirectory=clamav14
+RuntimeDirectoryMode=0755
+ExecStart=/opt/clamav/sbin/clamd --foreground=true --config-file=/opt/clamav/etc/clamd.conf
+ExecReload=/bin/kill -USR2 $MAINPID
+TimeoutStartSec=420
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

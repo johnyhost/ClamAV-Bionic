@@ -1,0 +1,15 @@
+[Unit]
+Description=ClamAV definition updater (clamav-opt, /opt/clamav)
+Documentation=https://github.com/johnyhost/ClamAV-Bionic
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=clamav
+Group=clamav
+ExecStart=/opt/clamav/bin/freshclam -d --foreground=true --config-file=/opt/clamav/etc/freshclam.conf
+Restart=on-failure
+RestartSec=300
+
+[Install]
+WantedBy=multi-user.target
