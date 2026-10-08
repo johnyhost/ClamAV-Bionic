@@ -70,7 +70,7 @@ jobs:
           '
 
       - name: Checksums
-        run: cd dist && sha256sum *.deb | tee SHA256SUMS
+        run: cd dist && sha256sum *.deb *.tar.gz | tee SHA256SUMS
 
       - uses: actions/upload-artifact@v4
         with:
@@ -83,10 +83,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="v${CLAMAV_VERSION}-${PKG_REVISION}"
+          src="dist/clamav-${CLAMAV_VERSION}.tar.gz"
           if gh release view "$tag" >/dev/null 2>&1; then
+            # Never replace a published package; only add the source if it is missing.
+            if ! gh release view "$tag" --json assets --jq '.assets[].name' | grep -qx "$(basename "$src")"; then
+              gh release upload "$tag" "$src"
+              echo "Added the source tarball to existing release $tag."
+            fi
             echo "Release $tag already exists; bump PKG_REVISION to publish a new build."
             exit 0
           fi
-          gh release create "$tag" --target "$GITHUB_SHA" dist/*.deb dist/SHA256SUMS \
+          gh release create "$tag" --target "$GITHUB_SHA" dist/*.deb "$src" dist/SHA256SUMS \
             --title "ClamAV ${CLAMAV_VERSION} for Ubuntu 18.04 (package revision ${PKG_REVISION})" \
             --notes "Built from the official ClamAV ${CLAMAV_VERSION} source in an ubuntu:18.04 container. Installs to /opt/clamav. See README for install, switch-over and rollback."

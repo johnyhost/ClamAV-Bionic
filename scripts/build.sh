@@ -33,6 +33,8 @@ work=$(mktemp -d)
 curl -fsSL "$SRC_URL" -o "$work/clamav.tar.gz"
 sha256sum "$work/clamav.tar.gz"
 tar xzf "$work/clamav.tar.gz" -C "$work"
+# Keep the exact source next to the package (GPL: ship the corresponding source).
+mkdir -p /src/dist && cp "$work/clamav.tar.gz" "/src/dist/clamav-${CLAMAV_VERSION}.tar.gz"
 cd "$work/clamav-${CLAMAV_VERSION}"
 
 echo "== configure and build"
