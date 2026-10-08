@@ -40,5 +40,7 @@ Description: ClamAV ${version%%-*} built for Ubuntu 18.04, installed in $prefix
 CTRL
 
 mkdir -p "$out"
-dpkg-deb --root-owner-group --build "$stage" "$out/${pkg}_${version}_amd64.deb"
-dpkg-deb --info "$out/${pkg}_${version}_amd64.deb"
+# File name without "~": GitHub rewrites it in release asset names.
+file="$out/${pkg}_${version/\~/_}_amd64.deb"
+dpkg-deb --root-owner-group --build "$stage" "$file"
+dpkg-deb --info "$file"

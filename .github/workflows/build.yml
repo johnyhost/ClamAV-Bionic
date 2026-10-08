@@ -20,7 +20,7 @@ permissions:
 
 env:
   CLAMAV_VERSION: "1.4.6"
-  PKG_REVISION: "1"
+  PKG_REVISION: "2"
 
 jobs:
   build:

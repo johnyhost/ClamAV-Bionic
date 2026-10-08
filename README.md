@@ -50,7 +50,7 @@ Each step below can be undone; the last section shows how.
 ### 1. Install the package (nothing starts yet)
 
 ```bash
-cd /tmp && wget -q https://github.com/johnyhost/ClamAV-Bionic/releases/download/v1.4.6-1/clamav-opt_1.4.6-1~bionic_amd64.deb && apt install -y ./clamav-opt_1.4.6-1~bionic_amd64.deb && /opt/clamav/bin/clamscan --version
+cd /tmp && wget -q https://github.com/johnyhost/ClamAV-Bionic/releases/download/v1.4.6-2/clamav-opt_1.4.6-2_bionic_amd64.deb https://github.com/johnyhost/ClamAV-Bionic/releases/download/v1.4.6-2/SHA256SUMS && sha256sum -c SHA256SUMS && apt install -y ./clamav-opt_1.4.6-2_bionic_amd64.deb && /opt/clamav/bin/clamscan --version
 ```
 
 ### 2. Download current definitions
