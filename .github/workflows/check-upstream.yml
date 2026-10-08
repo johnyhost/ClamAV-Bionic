@@ -1,0 +1,62 @@
+name: Check for a new ClamAV 1.4 release
+
+# Once a week, looks for a newer ClamAV 1.4.x release upstream. If there is
+# one, it updates CLAMAV_VERSION in build.yml, commits that to main and starts
+# the build workflow, which tests the package and publishes it as a release.
+# Watch this repository's releases to be told when that happens.
+#
+# Only the 1.4 long-term-support line is followed; moving to a newer line is a
+# deliberate manual change. Installing on a server is always manual.
+
+on:
+  schedule:
+    - cron: '17 5 * * 1'      # Mondays 05:17 UTC
+  workflow_dispatch:
+  push:                        # dry run when this file changes, to test it
+    branches: [main]
+    paths: ['.github/workflows/check-upstream.yml']
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare with the latest upstream 1.4.x release
+        id: cmp
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current=$(sed -n 's/^  CLAMAV_VERSION: "\(.*\)"/\1/p' .github/workflows/build.yml)
+          latest=$(gh api 'repos/Cisco-Talos/clamav/releases?per_page=100' --paginate \
+                     --jq '.[] | select(.draft|not) | select(.prerelease|not) | .tag_name' \
+                   | sed -n 's/^clamav-\(1\.4\.[0-9]\+\)$/\1/p' | sort -V | tail -1)
+          echo "built here: $current, latest upstream 1.4.x: $latest"
+          [ -n "$current" ] && [ -n "$latest" ] || { echo "::error::could not read versions"; exit 1; }
+          newest=$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)
+          if [ "$latest" != "$current" ] && [ "$newest" = "$latest" ]; then
+            echo "update=$latest" >> "$GITHUB_OUTPUT"
+            echo "::notice::New ClamAV release $latest (currently $current)"
+          else
+            echo "::notice::Up to date: $current"
+          fi
+
+      - name: Update build.yml and start the build
+        if: steps.cmp.outputs.update != '' && github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW: ${{ steps.cmp.outputs.update }}
+        run: |
+          sed -i -e "s/^  CLAMAV_VERSION: \".*\"/  CLAMAV_VERSION: \"$NEW\"/" \
+                 -e 's/^  PKG_REVISION: ".*"/  PKG_REVISION: "1"/' .github/workflows/build.yml
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Build ClamAV $NEW (found by the weekly upstream check)"
+          git push origin HEAD:main
+          # A push made with this token does not start other workflows, but a
+          # workflow_dispatch does.
+          gh workflow run build.yml --ref main

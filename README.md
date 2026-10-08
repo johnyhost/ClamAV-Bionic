@@ -187,7 +187,12 @@ sudo apt install ./clamav-opt_<new version>_bionic_amd64.deb
 sudo systemctl restart clamav14-daemon
 ```
 
-To be notified, use **Watch → Custom → Releases** on this repository.
+New ClamAV 1.4.x versions are picked up automatically: a weekly check
+(`.github/workflows/check-upstream.yml`, Mondays) compares the latest upstream
+1.4.x release with the version built here, and if there is a newer one it
+updates the version, builds and tests it, and publishes the release. To be
+notified when that happens, use **Watch → Custom → Releases** on this
+repository. Installing on a server always stays a manual step.
 
 ## Roll back
 
@@ -230,6 +235,7 @@ tarball it was built from are published as release
 | Path | What it is |
 | --- | --- |
 | `.github/workflows/build.yml` | Build, test and publish |
+| `.github/workflows/check-upstream.yml` | Weekly check for a new ClamAV 1.4.x release |
 | `scripts/build.sh` | Runs in the 18.04 container: tools, download, compile |
 | `scripts/package.sh` | Builds the `.deb` and works out its dependencies |
 | `packaging/etc/` | The two configuration files |
