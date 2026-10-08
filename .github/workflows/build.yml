@@ -48,8 +48,11 @@ jobs:
         if: failure()
         run: |
           [ -f build.log ] || exit 0
-          msg=$(tail -n 60 build.log | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk 'BEGIN{ORS="%0A"} {print}')
-          echo "::error title=Build log (last 60 lines)::${msg}"
+          # Annotations are short, so report the error lines rather than the raw tail.
+          errs=$(grep -n -E '(error|Error|ERROR)( |:|\[)' build.log | grep -v -i -E 'warning|-Werror|error_|_error|errors\.h|strerror' | tail -n 25)
+          [ -n "$errs" ] || errs=$(tail -n 25 build.log)
+          msg=$(printf '%s\n' "$errs" | cut -c1-220 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk 'BEGIN{ORS="%0A"} {print}')
+          echo "::error title=Build errors::${msg}"
 
       - name: Install and run the package in a clean Ubuntu 18.04 container
         run: |
