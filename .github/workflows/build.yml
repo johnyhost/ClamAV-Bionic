@@ -49,7 +49,8 @@ jobs:
         run: |
           [ -f build.log ] || exit 0
           # Annotations are short, so report the error lines rather than the raw tail.
-          errs=$(grep -n -E '(error|Error|ERROR)( |:|\[)' build.log | grep -v -i -E 'warning|-Werror|error_|_error|errors\.h|strerror' | tail -n 25)
+          first=$(grep -n -m1 -E '^(error|ERROR|CMake Error|E: )|: error:|fatal error' build.log | cut -d: -f1)
+          if [ -n "$first" ]; then errs=$(sed -n "$((first-3)),$((first+18))p" build.log); fi
           [ -n "$errs" ] || errs=$(tail -n 25 build.log)
           msg=$(printf '%s\n' "$errs" | cut -c1-220 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk 'BEGIN{ORS="%0A"} {print}')
           echo "::error title=Build errors::${msg}"
