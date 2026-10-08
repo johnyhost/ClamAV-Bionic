@@ -259,5 +259,8 @@ The package lands in `dist/`.
 
 ## Licences
 
-ClamAV is licensed under the GNU General Public License, version 2. Each
-release includes the exact ClamAV source tarball its package was built from.
+- **This repository** (build scripts, packaging files, documentation): MIT,
+  see [LICENSE](LICENSE).
+- **ClamAV**, and therefore the programs inside the published packages: GNU
+  General Public License, version 2. Each release includes the exact ClamAV
+  source tarball its package was built from.
