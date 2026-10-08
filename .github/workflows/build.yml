@@ -38,10 +38,18 @@ jobs:
       - name: Build in an Ubuntu 18.04 container
         run: |
           mkdir -p dist
+          set -o pipefail
           docker run --rm \
             -e CLAMAV_VERSION -e PKG_REVISION \
             -v "$PWD:/src" -w /src \
-            ubuntu:18.04 bash scripts/build.sh
+            ubuntu:18.04 bash -x scripts/build.sh 2>&1 | tee build.log
+
+      - name: Report the end of the build log as an annotation
+        if: failure()
+        run: |
+          [ -f build.log ] || exit 0
+          msg=$(tail -n 60 build.log | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk 'BEGIN{ORS="%0A"} {print}')
+          echo "::error title=Build log (last 60 lines)::${msg}"
 
       - name: Install and run the package in a clean Ubuntu 18.04 container
         run: |
