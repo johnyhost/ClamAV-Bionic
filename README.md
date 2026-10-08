@@ -38,7 +38,8 @@ container on GitHub's machines, so the result fits an 18.04 server exactly.
   push, and tag it.
 
 Build tools, pinned for reproducible builds: CMake 3.31.6 from Kitware and Rust
-1.70.0 from rustup (the minimum ClamAV 1.4.x is documented to build with).
+1.83.0 from rustup. ClamAV documents Rust 1.70 as the minimum for 1.4.x, but
+the 1.4.6 source ships a Cargo.lock in a format that needs cargo 1.78 or newer.
 
 ## On the server
 

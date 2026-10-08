@@ -6,7 +6,7 @@ set -euo pipefail
 : "${CLAMAV_VERSION:?set CLAMAV_VERSION, for example 1.4.6}"
 : "${PKG_REVISION:=1}"
 CMAKE_VERSION=3.31.6
-RUST_VERSION=1.70.0          # the minimum ClamAV 1.4.x is documented to build with
+RUST_VERSION=1.83.0          # 1.4.6 ships a version-4 Cargo.lock, which needs cargo 1.78 or newer
 PREFIX=/opt/clamav
 SRC_URL="https://www.clamav.net/downloads/production/clamav-${CLAMAV_VERSION}.tar.gz"
 
