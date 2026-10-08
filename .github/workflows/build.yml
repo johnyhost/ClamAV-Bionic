@@ -5,7 +5,8 @@ name: Build ClamAV for Ubuntu 18.04
 # installs into /opt/clamav without touching Ubuntu's own clamav packages.
 #
 # Every push builds and tests the package and keeps it as a workflow artifact.
-# Pushing a tag such as v1.4.6-1 also publishes it as a GitHub release.
+# A push to main also publishes it as release v<CLAMAV_VERSION>-<PKG_REVISION>,
+# unless that release already exists. Bump PKG_REVISION to publish a rebuild.
 
 on:
   push:
@@ -76,11 +77,16 @@ jobs:
           name: clamav-opt-${{ env.CLAMAV_VERSION }}-${{ env.PKG_REVISION }}
           path: dist/
 
-      - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publish release (main only, once per version)
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/*.deb dist/SHA256SUMS \
+          tag="v${CLAMAV_VERSION}-${PKG_REVISION}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists; bump PKG_REVISION to publish a new build."
+            exit 0
+          fi
+          gh release create "$tag" --target "$GITHUB_SHA" dist/*.deb dist/SHA256SUMS \
             --title "ClamAV ${CLAMAV_VERSION} for Ubuntu 18.04 (package revision ${PKG_REVISION})" \
             --notes "Built from the official ClamAV ${CLAMAV_VERSION} source in an ubuntu:18.04 container. Installs to /opt/clamav. See README for install, switch-over and rollback."

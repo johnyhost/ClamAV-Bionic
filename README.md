@@ -32,10 +32,11 @@ container on GitHub's machines, so the result fits an 18.04 server exactly.
 - Every push to `main` builds the package, installs it in a clean 18.04
   container, checks that every binary finds its libraries, and keeps the
   `.deb` as a workflow artifact.
-- Pushing a tag `v<clamav version>-<package revision>`, for example `v1.4.6-1`,
-  does the same and publishes the `.deb` and `SHA256SUMS` as a release.
-- To build a new ClamAV patch release, change `CLAMAV_VERSION` in the workflow,
-  push, and tag it.
+- A push to `main` also publishes the `.deb` and `SHA256SUMS` as release
+  `v<CLAMAV_VERSION>-<PKG_REVISION>`, for example `v1.4.6-1`, unless that
+  release already exists.
+- To build a new ClamAV patch release, change `CLAMAV_VERSION` in the workflow
+  and push. To publish a rebuild of the same version, raise `PKG_REVISION`.
 
 Build tools, pinned for reproducible builds: CMake 3.31.6 from Kitware and Rust
 1.88.0 from rustup. ClamAV documents Rust 1.70 as the minimum for 1.4.x, but
