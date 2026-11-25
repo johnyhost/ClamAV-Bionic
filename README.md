@@ -234,6 +234,7 @@ tarball it was built from are published as release
 
 | Path | What it is |
 | --- | --- |
+| `clamav-version.env` | The ClamAV version and package revision to build |
 | `.github/workflows/build.yml` | Build, test and publish |
 | `.github/workflows/check-upstream.yml` | Weekly check for a new ClamAV 1.4.x release |
 | `scripts/build.sh` | Runs in the 18.04 container: tools, download, compile |
@@ -244,8 +245,8 @@ tarball it was built from are published as release
 
 ### Building a new version
 
-1. Change `CLAMAV_VERSION` in `.github/workflows/build.yml` (and set
-   `PKG_REVISION` back to `1`).
+1. Change `CLAMAV_VERSION` in `clamav-version.env` (and set `PKG_REVISION`
+   back to `1`). The weekly check does this for new 1.4.x releases.
 2. Push to `main`. The new release appears when the workflow finishes, after
    about 6 minutes.
 
