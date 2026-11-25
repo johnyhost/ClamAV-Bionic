@@ -1,7 +1,7 @@
 name: Check for a new ClamAV 1.4 release
 
 # Once a week, looks for a newer ClamAV 1.4.x release upstream. If there is
-# one, it updates CLAMAV_VERSION in build.yml, commits that to main and starts
+# one, it updates clamav-version.env, commits that to main and starts
 # the build workflow, which tests the package and publishes it as a release.
 # Watch this repository's releases to be told when that happens.
 #
@@ -31,7 +31,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          current=$(sed -n 's/^  CLAMAV_VERSION: "\(.*\)"/\1/p' .github/workflows/build.yml)
+          current=$(sed -n 's/^CLAMAV_VERSION=//p' clamav-version.env)
           latest=$(gh api 'repos/Cisco-Talos/clamav/releases?per_page=100' --paginate \
                      --jq '.[] | select(.draft|not) | select(.prerelease|not) | .tag_name' \
                    | sed -n 's/^clamav-\(1\.4\.[0-9]\+\)$/\1/p' | sort -V | tail -1)
@@ -45,14 +45,16 @@ jobs:
             echo "::notice::Up to date: $current"
           fi
 
-      - name: Update build.yml and start the build
+      - name: Update clamav-version.env and start the build
         if: steps.cmp.outputs.update != '' && github.event_name != 'push'
         env:
           GH_TOKEN: ${{ github.token }}
           NEW: ${{ steps.cmp.outputs.update }}
         run: |
-          sed -i -e "s/^  CLAMAV_VERSION: \".*\"/  CLAMAV_VERSION: \"$NEW\"/" \
-                 -e 's/^  PKG_REVISION: ".*"/  PKG_REVISION: "1"/' .github/workflows/build.yml
+          # The version lives outside .github/workflows/ because this token may
+          # not push changes to workflow files.
+          sed -i -e "s/^CLAMAV_VERSION=.*/CLAMAV_VERSION=$NEW/" \
+                 -e 's/^PKG_REVISION=.*/PKG_REVISION=1/' clamav-version.env
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -am "Build ClamAV $NEW (found by the weekly upstream check)"
